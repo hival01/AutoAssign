@@ -3,6 +3,7 @@
 
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
@@ -29,6 +30,10 @@ model Student {
   email        String    @unique
   dob          String
   passwordHash String
+  current_sem  Int
+  dept_id      Int
+
+  department   Department @relation(fields: [dept_id], references: [dept_id])
 
   batch_id Int
   batch    Batch @relation(fields: [batch_id], references: [batch_id])
@@ -42,23 +47,38 @@ model Batch {
   batch_name  String   // A1, B1, etc.
   semester    Int
   year        Int
-  department  String
+  dept_id     Int
+
+  department  Department @relation(fields: [dept_id], references: [dept_id])
 
   students Student[]
   teaches  Teaches[]
 
-  @@unique([batch_name, semester, year, department])
+  @@unique([batch_name, semester, year, dept_id])
 }
 
 model Course {
   subject_code String  @id   // CE356, MA201, etc.
   title        String
-  department   String
+  dept_id     Int
 
+  department  Department @relation(fields: [dept_id], references: [dept_id])
+  semesterCourses SemesterCourse[]
   teaches     Teaches[]
   takes       Takes[]
   questions   Question[]
   assignments Assignment[]
+}
+
+model SemesterCourse {
+  sem_course_id Int    @id @default(autoincrement())
+  dept_id       Int
+  semester_no   Int
+  subject_code  String
+  department    Department @relation(fields: [dept_id], references: [dept_id])
+  course        Course     @relation(fields: [subject_code], references: [subject_code])
+
+  @@unique([dept_id, semester_no, subject_code])
 }
 
 model Teaches {
@@ -76,9 +96,12 @@ model Takes {
   takes_id     Int @id @default(autoincrement())
   student_id   String
   subject_code String
+  semester_no Int
 
   student Student @relation(fields: [student_id], references: [student_id])
   course  Course  @relation(fields: [subject_code], references: [subject_code])
+
+  @@unique([student_id, subject_code, semester_no])
 }
 
 model Question {
@@ -97,9 +120,11 @@ model Question {
 }
 
 model Assignment {
-  assignment_id Int      @id @default(autoincrement())
-  title         String
-  created_on    DateTime @default(now())
+  assignment_id  Int      @id @default(autoincrement())
+  title          String
+  created_on     DateTime @default(now())
+  deadline       DateTime                 
+  lateSubmission Int
 
   subject_code String
 
@@ -122,15 +147,33 @@ model AssignmentAllocation {
   allocation_id Int @id @default(autoincrement())
   student_id    String
   assignment_id Int
-  status        String   // "assigned", "submitted"
+  status         AllocationStatus   
   file_path     String?
   submitted_on  DateTime?
 
   student    Student    @relation(fields: [student_id], references: [student_id])
   assignment Assignment @relation(fields: [assignment_id], references: [assignment_id])
+
+  @@unique([student_id, assignment_id])
+}
+
+model Department {
+  dept_id    Int       @id @default(autoincrement())
+  dept_code  String    @unique
+  dept_name  String
+  students   Student[]
+  courses    Course[]
+  semesterCourses SemesterCourse[]
+  batches    Batch[]
 }
 
 enum SourceType {
   TOPIC
   PDF
+}
+
+enum AllocationStatus {
+  ASSIGNED
+  SUBMITTED
+  LATE
 }
