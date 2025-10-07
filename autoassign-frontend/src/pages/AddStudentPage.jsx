@@ -6,7 +6,7 @@ const AddStudent = () => {
   const [studentDetails, setStudentDetails] = useState({
     studentId: "",
     studentName: "",
-    department: "",
+    department: "",  //this is dept_id
     semester: "",
     email: "",
     dob: "",
@@ -15,9 +15,24 @@ const AddStudent = () => {
 
   const [batches, setBatches] = useState([]);
   const [message, setMessage] = useState("");
+  const [department, setDepartment] = useState([]);
 
-  const departments = ["CE", "IT"];
   const semesters = [1, 2, 3, 4, 5, 6, 7, 8];
+
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const response = await axios.get("http://localhost:3007/api/departments");
+        console.log("Departments API response:", response.data); // ✅ log here
+        setDepartment(response.data);
+      } catch (error) {
+        console.error("Error fetching departments:", error);
+        setDepartment([]);
+      }
+    };
+
+    fetchDepartments();
+  }, []);
 
   useEffect(() => {
     const fetchBatches = async () => {
@@ -25,7 +40,7 @@ const AddStudent = () => {
         try {
           const response = await axios.get("http://localhost:3007/api/batches", {
             params: {
-              department: studentDetails.department,
+              department: studentDetails.department, //this is dept_id
               semester: studentDetails.semester,
             },
           });
@@ -59,7 +74,7 @@ const AddStudent = () => {
       setStudentDetails({
         studentId: "",
         studentName: "",
-        department: "",
+        department: "", //this is dept_id
         semester: "",
         email: "",
         dob: "",
@@ -129,9 +144,9 @@ const AddStudent = () => {
                 className="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition shadow-sm p-3"
               >
                 <option value="">-- Select Department --</option>
-                {departments.map((dep) => (
-                  <option key={dep} value={dep}>
-                    {dep}
+                {department.map((dep) => (
+                  <option key={dep.dept_id} value={dep.dept_id}>
+                    {dep.dept_code} - {dep.dept_name}
                   </option>
                 ))}
               </select>

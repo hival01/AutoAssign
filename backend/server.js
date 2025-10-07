@@ -268,7 +268,7 @@ app.get('/api/batches', async (req, res) => {
 
     const batches = await prisma.batch.findMany({
       where: {
-        department,
+        dept_id: Number(department),
         semester: Number(semester),
         year: currentYear
       }
@@ -280,20 +280,73 @@ app.get('/api/batches', async (req, res) => {
     res.status(500).json({ error: "Failed to fetch batches" });
   }
 });
+  
+
+app.get('/api/departments', async (req, res) => {
+  try {
+    const departments = await prisma.department.findMany({
+      select: {
+        dept_id: true,
+        dept_code: true,
+        dept_name: true,
+      },
+    });
+    res.json(departments);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch departments" });
+  }
+});
 
 
 // Add new Student
+// app.post('/api/add-student', async (req, res) => {
+//   try {
+//     const { studentId, studentName, department, email, dob, batch } = req.body;
+//     const dobDate = new Date(dob);
+//     const dobString = dobDate.toISOString().split('T')[0];
+
+//     // Default password = ddmmyyyy
+//     const rawPassword = `${('0' + dobDate.getDate()).slice(-2)}${('0' + (dobDate.getMonth() + 1)).slice(-2)}${dobDate.getFullYear()}`;
+
+//     // Hash password
+//     const hashedPassword = await bcrypt.hash(rawPassword, 10); // 10 = salt rounds
+
+//     await prisma.student.create({
+//       data: {
+//         student_id: studentId,
+//         name: studentName,
+//         email,
+//         dob: dobString,
+//         batch_id: parseInt(batch, 10),
+//         passwordHash: hashedPassword,
+//       },
+//     });
+
+//     res.status(201).json({ message: 'Student added successfully.' });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'An error occurred.' });
+//   }
+// }); old code with no deptatment 
 app.post('/api/add-student', async (req, res) => {
   try {
-    const { studentId, studentName, department, email, dob, batch } = req.body;
+    const { studentId, studentName, department, semester, email, dob, batch } = req.body;
+
+    // Validate required fields
+    if (!studentId || !studentName || !department || !semester || !batch || !email || !dob) {
+      return res.status(400).json({ error: "All fields are required." });
+    }
+
+    const batchId = parseInt(batch, 10);
+    const deptId = parseInt(department, 10);
+    const currentSem = parseInt(semester, 10);
+
     const dobDate = new Date(dob);
     const dobString = dobDate.toISOString().split('T')[0];
 
     // Default password = ddmmyyyy
     const rawPassword = `${('0' + dobDate.getDate()).slice(-2)}${('0' + (dobDate.getMonth() + 1)).slice(-2)}${dobDate.getFullYear()}`;
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(rawPassword, 10); // 10 = salt rounds
+    const hashedPassword = await bcrypt.hash(rawPassword, 10);
 
     await prisma.student.create({
       data: {
@@ -301,17 +354,20 @@ app.post('/api/add-student', async (req, res) => {
         name: studentName,
         email,
         dob: dobString,
-        batch_id: parseInt(batch, 10),
+        batch_id: batchId,
+        dept_id: deptId,
+        current_sem: currentSem,
         passwordHash: hashedPassword,
       },
     });
 
     res.status(201).json({ message: 'Student added successfully.' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'An error occurred.' });
+    console.error("Error adding student:", error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 // GET all courses a student is enrolled in
 app.get('/api/student/courses/:studentId', async (req, res) => {
@@ -719,18 +775,20 @@ app.get("/api/faculty/questions/:subjectCode", async (req, res) => {
 
 // Creates an assignment with selected questions
 app.post("/api/faculty/create-assignment", async (req, res) => {
-  const { title, subject_code, questions } = req.body;
+  const { title, subject_code,deadline, lateSubmission, questions } = req.body;
 
-  if (!subject_code || !questions || !questions.length) {
+  if (!subject_code || !questions || !questions.length || !title || !deadline ) {
     return res.status(400).json({ error: "Invalid data." });
   }
 
-  try {
+  try { 
     // Create assignment
     const assignment = await prisma.assignment.create({
       data: {
         subject_code,
         title,
+        deadline: new Date(deadline),
+        lateSubmission: parseInt(lateSubmission, 10),
         questions: {
           create: questions.map((qid) => ({
             question_id: qid,
@@ -761,7 +819,7 @@ app.post("/api/faculty/assign-assignment", async (req, res) => {
           data: {
             assignment_id: assignmentId,
             student_id: sid,
-            status: "assigned",
+            status: "ASSIGNED",
           },
         })
       )

@@ -12,6 +12,8 @@ export default function CreateAssignment() {
   const [questions, setQuestions] = useState([]);
   const [selectedQuestions, setSelectedQuestions] = useState([]);
   const [title, setTitle] = useState("");
+  const [deadline, setDeadline] = useState("");
+  const [lateSubmission, setLateSubmission] = useState(0);
 
   // Fetch subjects for faculty
   useEffect(() => {
@@ -51,6 +53,8 @@ export default function CreateAssignment() {
       .post("http://localhost:3007/api/faculty/create-assignment", {
         title,
         subject_code: selectedSubject,
+        deadline,
+        lateSubmission,
         questions: selectedQuestions,
       })
       .then(() => {
@@ -95,6 +99,41 @@ export default function CreateAssignment() {
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Enter assignment title"
         />
+
+        {/* Deadline Field */}
+        <label className="block mb-2 text-sm font-semibold text-gray-600">
+          Deadline
+        </label>
+        <input
+          type="datetime-local"
+          className="w-full px-4 py-2 mb-6 border border-gray-300 rounded-lg bg-white/70 shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none transition"
+          value={deadline}
+          onChange={(e) => setDeadline(e.target.value)}
+        />
+
+        {/* Late Submission Toggle */}
+        <div className="flex items-center justify-between">
+          <span className="text-gray-700 font-semibold">
+            Allow Late Submission?
+          </span>
+          <button
+            type="button"
+            onClick={() => setLateSubmission((prev) => (prev === 1 ? 0 : 1))}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              lateSubmission ? "bg-green-500" : "bg-gray-300"
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                lateSubmission ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
+        </div>
+
+        <p className="text-sm text-gray-500 mt-1 mb-6 ">
+          {lateSubmission ? "✅ Late submission allowed" : "❌ Not allowed"}
+        </p>
 
         {/* Questions */}
         {questions.length > 0 && (

@@ -87,7 +87,7 @@ model Teaches {
   subject_code String
   batch_id     Int
 
-  faculty Faculty @relation(fields: [faculty_id], references: [faculty_id])
+  faculty Faculty @relation(fields: [ faculty_id], references: [faculty_id])
   course  Course  @relation(fields: [subject_code], references: [subject_code])
   batch   Batch   @relation(fields: [batch_id], references: [batch_id])
 }

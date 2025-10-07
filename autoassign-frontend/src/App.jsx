@@ -9,6 +9,7 @@ import AddFaculty from './pages/AddFacultyPage';
 import GenerateQuestions from './pages/GenerateQuestionsPage';
 import CreateAssignment from "./pages/CreateAssignmentPage";
 import AssignAssignment from "./pages/AssignAssignmentPage"
+import NotFound from "./pages/NotFound";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route path="/gen-questions" element={<GenerateQuestions />} />
           <Route path="/CreateAssignment" element={<CreateAssignment />} />
           <Route path="/AssignAssignment" element={<AssignAssignment />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </>
