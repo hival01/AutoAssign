@@ -8,6 +8,7 @@ import bcrypt from "bcrypt";
 import pdfParse from "pdf-parse";
 import path from "path";
 import { fileURLToPath } from "url";
+import { title } from "process";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -259,6 +260,129 @@ app.post('/api/add-faculty', async (req, res) => {
     res.status(500).json({ error: 'An error occurred.' });
   }
 });
+
+// POST /api/admin/add-department
+app.post("/api/admin/add-department", async (req, res) => {
+  try {
+    const { dept_code, dept_name } = req.body;
+    const newDept = await prisma.department.create({
+      data: { dept_code, dept_name },
+    });
+    res.json({ message: "Department added successfully!", data: newDept });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error creating department" });
+  }
+});
+
+// POST /api/admin/add-batch
+app.post("/api/admin/add-batch", async (req, res) => {
+  try {
+    const { batch_name, semester, year, dept_id } = req.body;
+
+    const newBatch = await prisma.batch.create({
+      data: {
+        batch_name,
+        semester,
+        year,
+        dept_id,
+      },
+    });
+
+    res.json({ message: "Batch added successfully!", data: newBatch });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error creating batch" });
+  }
+});
+
+app.post("/api/add-course", async (req, res) => {
+  const { subject_code, title, dept_id } = req.body;
+
+  try {
+    await prisma.course.create({
+      data: { 
+        title: title,
+        subject_code: subject_code,
+        dept_id: parseInt(dept_id),
+      },
+    });
+
+    res.json({ message: "Course added successfully!" });
+  } catch (err) {
+    console.error("Error adding course:", err);
+    res.status(500).json({ message: "Failed to add course." });
+  }
+});
+
+// GET all faculties
+app.get("/api/faculties", async (req, res) => {
+  try {
+    const faculties = await prisma.faculty.findMany({
+      select: {
+        faculty_id: true,
+        name: true,
+      },
+    });
+    res.json(faculties);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching faculties" });
+  }
+});
+
+// GET all courses
+app.get("/api/courses", async (req, res) => {
+  try {
+    const courses = await prisma.course.findMany({
+      select: {
+        subject_code: true,
+        title: true,
+      },
+    });
+    res.json(courses);
+  } catch (error) { 
+    console.error(error);
+    res.status(500).json({ message: "Error fetching courses" });
+  }
+});
+
+// GET batches by department
+app.get("/api/batches/:dept_id", async (req, res) => {
+  const { dept_id } = req.params;
+  try {
+    const batches = await prisma.batch.findMany({
+      where: { dept_id: parseInt(dept_id) },
+      select: {
+        batch_id: true,
+        batch_name: true,
+      },
+    });
+    res.json(batches);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching batches" });
+  }
+});
+
+// POST create teaches record
+app.post("/api/add-teaches", async (req, res) => {
+  const { faculty_id, subject_code, batch_id } = req.body;
+  try {
+    const newTeach = await prisma.teaches.create({
+      data: {
+        faculty_id: parseInt(faculty_id),
+        subject_code,
+        batch_id: parseInt(batch_id),
+      },
+    });
+    res.status(201).json({ message: "Teaches record added successfully", newTeach });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error adding teaches record" });
+  }
+});
+
 
 app.get('/api/batches', async (req, res) => {
   const { department, semester } = req.query;

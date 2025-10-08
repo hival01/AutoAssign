@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { UserPlus, GraduationCap, LogOut } from "lucide-react"; // icons
+import { UserPlus, GraduationCap, LogOut ,Users } from "lucide-react"; // icons
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -49,6 +49,62 @@ const AdminDashboard = () => {
           </h3>
           <p className="text-gray-500 text-sm">
             Onboard faculty members to the platform.
+          </p>
+        </Link>
+
+        {/* Add Department Card */}
+        <Link
+          to="/add-department"
+          className="group relative bg-white rounded-2xl p-8 shadow-md hover:shadow-xl transition-all border border-gray-200 hover:border-blue-500"
+        >
+          <GraduationCap className="w-10 h-10 text-blue-500 mb-4 group-hover:scale-110 transition-transform" />
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">
+            Add Department
+          </h3>
+          <p className="text-gray-500 text-sm">
+            Create and manage academic departments.
+          </p>
+        </Link>
+
+        {/* Add Batch Card */}
+        <Link
+          to="/add-batch"
+          className="group relative bg-white rounded-2xl p-8 shadow-md hover:shadow-xl transition-all border border-gray-200 hover:border-yellow-500"
+        >
+          <GraduationCap className="w-10 h-10 text-yellow-500 mb-4 group-hover:scale-110 transition-transform" />
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">
+            Add Batch
+          </h3>
+          <p className="text-gray-500 text-sm">
+            Create batches for specific semesters and departments.
+          </p>
+        </Link>
+
+        {/* Add Course Card */}
+        <Link
+          to="/add-course"
+          className="group relative bg-white rounded-2xl p-8 shadow-md hover:shadow-xl transition-all border border-gray-200 hover:border-blue-500"
+        >
+          <GraduationCap className="w-10 h-10 text-blue-500 mb-4 group-hover:scale-110 transition-transform" />
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">
+            Add New Course
+          </h3>
+          <p className="text-gray-500 text-sm">
+            Create and manage course details for departments.
+          </p>
+        </Link>
+
+        {/* Add Teaches Card */}
+        <Link
+          to="/add-teaches"
+          className="group relative bg-white rounded-2xl p-8 shadow-md hover:shadow-xl transition-all border border-gray-200 hover:border-green-500"
+        >
+          <Users className="w-10 h-10 text-green-500 mb-4 group-hover:scale-110 transition-transform" />
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">
+            Assign Faculty to Subject
+          </h3>
+          <p className="text-gray-500 text-sm">
+            Assign which faculty teaches which subject in a specific batch.
           </p>
         </Link>
 

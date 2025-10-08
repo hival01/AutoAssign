@@ -9,6 +9,10 @@ import AddFaculty from './pages/AddFacultyPage';
 import GenerateQuestions from './pages/GenerateQuestionsPage';
 import CreateAssignment from "./pages/CreateAssignmentPage";
 import AssignAssignment from "./pages/AssignAssignmentPage"
+import AddDepartment from "./pages/AddDepartment";
+import AddBatch from "./pages/AddBatch"
+import AddCourse from "./pages/AddCourse";
+import AddTeaches from "./pages/AddTeaches";
 import NotFound from "./pages/NotFound";
 
 function App() {
@@ -26,6 +30,10 @@ function App() {
           <Route path="/gen-questions" element={<GenerateQuestions />} />
           <Route path="/CreateAssignment" element={<CreateAssignment />} />
           <Route path="/AssignAssignment" element={<AssignAssignment />} />
+          <Route path="/add-department" element={<AddDepartment />} />
+          <Route path="/add-batch" element={<AddBatch />} />
+          <Route path="/add-course" element={<AddCourse />} />
+          <Route path="/add-teaches" element={<AddTeaches />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
